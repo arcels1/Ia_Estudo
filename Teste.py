@@ -1,51 +1,29 @@
+import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
+
+dados_treino = pd.read_csv('iris.csv')
+print(dados_treino)
+dados_treino.head()
+X = dados_treino.iloc[:, [0, 1, 2, 3]].values
+y = dados_treino.iloc[0:100,4].values
+print( dados_treino.iloc[:,[0,1,2,3]])
+Sepala_comprimento = dados_treino.iloc[0:100, 0].values
+Sepala_largura= dados_treino.iloc[0:100, 1].values
+Petala_comprimento=dados_treino.iloc[0:100, 2].values
+Petala_largura=dados_treino.iloc[0:100, 3].values
 
 
-# Criar figura e eixos
-fig, ax = plt.subplots()
+data = {'Sepala_Comprimento': Sepala_comprimento,
+        'Sepala_Largura': Sepala_largura,
+        'Petala_comprimento': Petala_comprimento,
+        'Petala_largura': Petala_largura}
+print(data)
+df = pd.DataFrame(data)
 
-# Definir limites do gráfico
-ax.set_xlim(-10, 10)
-ax.set_ylim(-10, 10)
+# Save the DataFrame to a CSV file
+# 'output.csv' is the desired file name
+# index=False prevents writing the DataFrame index as a column in the CSV
+df.to_csv('output.csv', index=False)
 
-# Adicionar linhas dos eixos X e Y no meio do gráfico
-ax.axhline(0, color='black', linewidth=1)  # eixo X
-ax.axvline(0, color='black', linewidth=1)  # eixo Y
-
-# Adicionar grade
-ax.grid(True, linestyle='--', alpha=0.5)
-# Adicionando um ponto
-ax.plot(3, 4, 'bo')  # ponto azul em (3, 4)
-
-# Adicionando uma função linear
-x = range(-10, 11)
-y = [2*i + 1 for i in x]
-ax.plot(x, y, 'g-')  # linha verde representando y = 2x + 1
-
-# Marcar o ponto de origem
-ax.plot(0, 0, 'ro')  # ponto vermelho na origem
-
-# Títulos dos eixos
-ax.set_xlabel('Eixo X')
-ax.set_ylabel('Eixo Y')
-ax.set_title('Plano Cartesiano 2D')
-
-plt.gca().set_aspect('equal')  # deixa os eixos com mesma escala
-plt.show()
-
-
-
-
-
-
-xLinha = np.random.uniform(-2,2,size=60)
-    print(len(xLinha))
-    yLinha = np.zeros(len(xLinha))
-    for i in range(0,len(xLinha)):
-        if (xLinha[i] >= 0):
-            yLinha[i] = 1
-            continue
-        yLinha[i] = 0
-
-
-    ax.plot(xLinha, yLinha, 'go')
+print("CSV file 'output.csv' created successfully.")
