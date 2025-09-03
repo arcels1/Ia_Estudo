@@ -1,29 +1,103 @@
-import numpy as np
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # Para visualizacao dos dados e do erro
+import numpy as np  # Biblioteca de manipulacao de arrays Numpy
+from matplotlib.colors import ListedColormap  # Lista de cores para plotagens
 import pandas as pd
 
-dados_treino = pd.read_csv('iris.csv')
-print(dados_treino)
-dados_treino.head()
-X = dados_treino.iloc[:, [0, 1, 2, 3]].values
-y = dados_treino.iloc[0:100,4].values
-print( dados_treino.iloc[:,[0,1,2,3]])
-Sepala_comprimento = dados_treino.iloc[0:100, 0].values
-Sepala_largura= dados_treino.iloc[0:100, 1].values
-Petala_comprimento=dados_treino.iloc[0:100, 2].values
-Petala_largura=dados_treino.iloc[0:100, 3].values
+### Carregar iris dataset
+df = pd.read_csv('iris.csv')
+df.head()
+
+print(df)
+
+X = df.iloc[0:100, [0, 1, 2, 3]].values
+y = df.iloc[0:100, 4].values
+
+# print(X)
+# print("Y:", y)
+
+### Assumindo que Setosa(0) seja -1 e Versicolor = 1
+
+### Plotar o grafico
+### vermelhos ----> Classe2 (-1)
+### azuis ----> Classe1 (1)
 
 
-data = {'Sepala_Comprimento': Sepala_comprimento,
-        'Sepala_Largura': Sepala_largura,
-        'Petala_comprimento': Petala_comprimento,
-        'Petala_largura': Petala_largura}
-print(data)
-df = pd.DataFrame(data)
+cm_bright = ListedColormap(['#FF0000', '#0000FF'])
+plt.figure(figsize=(7, 5))
+plt.scatter(X[:, 0], X[:, 1], c=y.ravel(), cmap=cm_bright)
 
-# Save the DataFrame to a CSV file
-# 'output.csv' is the desired file name
-# index=False prevents writing the DataFrame index as a column in the CSV
-df.to_csv('output.csv', index=False)
+plt.scatter(None, None, color='r', label='Setosa')
+plt.scatter(None, None, color='b', label='Versicolor')
+plt.legend()
+plt.title('Visualizacao do Dataset')
+plt.show()
 
-print("CSV file 'output.csv' created successfully.")
+
+###Construindo Adaline
+class Adaline(object):
+    def __init__(self, eta=0.001, epoch=100):
+        self.eta = eta
+        self.epoch = epoch
+
+    def fit(self, X, y):
+        np.random.seed(16)
+        self.weight_ = np.random.uniform(-1, 1, X.shape[1] + 1)
+        self.error_ = []
+
+        cost = 0
+        for _ in range(self.epoch):
+            output = self.activation_function(X)
+            error = y - output
+
+            self.weight_[0] += self.eta * sum(error)
+            self.weight_[1:] += self.eta * X.T.dot(error)
+
+            cost = 1. / 2 * sum((error ** 2))
+            self.error_.append(cost)
+
+        return self
+
+    def net_input(self, X):
+        """Calculo da entrada z"""
+        print(X)
+        print(self.weight_[1:])
+        print(np.dot(X,self.weight_[1:]))
+        print(np.dot(X, self.weight_[1:])) + self.weight_[0]
+        return np.dot(X, self.weight_[1:]) + self.weight_[0]
+
+    def activation_function(self, X):
+        """Calculo da saida da funcao g(z)"""
+        return self.net_input(X)
+
+    def predict(self, X):
+        """Retornar valores binaros 0 ou 1"""
+        return np.where(self.activation_function(X) >= 0.0, 1, -1)
+
+
+###Plotando erros apos 100 epocas
+names = ['Taxa de Aprendizado = 0.001', 'Taxa de Aprendizado = 0.0001']
+classifiers = [Adaline(), Adaline(eta=0.0001)]
+step = 1
+plt.figure(figsize=(14, 5))
+for name, classifier in zip(names, classifiers):
+    ax = plt.subplot(1, 2, step)
+    clf = classifier.fit(X, y)
+    ax.plot(range(len(clf.error_)), clf.error_)
+    ax.set_ylabel('Error')
+    ax.set_xlabel('Epoch')
+    ax.set_title(name)
+
+    step += 1
+
+plt.show()
+
+### Plotando as fronteiras de decisao com Adaline
+clf = Adaline(eta=0.0001)
+clf.fit(X, y)
+
+A = [6.1, 3.0, 4.6, 1.4]  # Classe 1
+B = [4.8, 3.0, 1.4, 0.1]  # Classe -1
+
+print(clf.predict(A))
+
+print(clf.predict(B))
